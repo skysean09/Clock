@@ -12,7 +12,7 @@
       --panel-bg: #e3e4e8;
       --text-color: #232323;
       --colon-color: #e3e4e8;
-      --date-color: #232323;
+      --date-color: #232323; /* 날짜 글자색도 메인 텍스트와 동기화 */
     }
 
     @media (prefers-color-scheme: dark) {
@@ -32,39 +32,34 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100vw;
       height: 100vh;
       overflow: hidden;
       user-select: none;
       transition: background-color 0.3s ease;
     }
 
-    /* 반응형 핵심: 노션 임베드 크기를 감지하는 메인 컨테이너 */
     .clock-container {
-      width: 100%;
-      height: 100%;
+      width: 480px;
+      height: 200px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      container-type: size; /* 이 컨테이너의 높이(cqh)를 기준으로 자식들이 스케일링됨 */
+      will-change: transform;
     }
 
-    /* 플립 시계 래퍼: 전체 높이의 60%를 차지하며 가로세로 비율 유지 */
     .flip-clock {
       display: flex;
       align-items: center;
-      gap: 4cqh; /* 패널 사이 여백도 높이에 비례 */
-      height: 60cqh;
+      gap: 14px;
     }
 
-    /* 개별 플립 그룹 박스: 높이에 맞춰 가로 비율이 1:1.04로 자동 연동 */
     .flip-group {
       position: relative;
-      width: 58cqh;  /* 원본 코드의 120px : 125px 비율 반영 */
-      height: 60cqh;
-      perspective: 200cqh; /* 원본 400px 왜곡도를 높이 비율로 조정 */
-      border-radius: 6cqh;
+      width: 120px;
+      height: 125px;
+      perspective: 400px;
+      border-radius: 12px;
       box-shadow: none;
     }
 
@@ -80,37 +75,36 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* 내부 텍스트 폰트 크기 자동화 */
     .panel span {
       position: absolute;
       width: 100%;
       left: 0;
-      height: 60cqh; /* 부모 flip-group 전체 높이와 동기화 */
+      height: 125px;
       font-family: 'Black Han Sans', sans-serif;
-      font-size: 36.5cqh; /* 원본 125px 중 76px 비율 계산 처리 */
+      font-size: 76px;
       text-align: center;
     }
 
     .panel.top {
       top: 0;
-      border-top-left-radius: 6cqh;
-      border-top-right-radius: 6cqh;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
       transform-origin: bottom;
     }
     .panel.top span {
       top: 0;
-      line-height: 60cqh;
+      line-height: 125px;
     }
 
     .panel.bottom {
       bottom: 0;
-      border-bottom-left-radius: 6cqh;
-      border-bottom-right-radius: 6cqh;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
       transform-origin: top;
     }
     .panel.bottom span {
       bottom: 0;
-      line-height: 60cqh;
+      line-height: 125px;
     }
 
     .top.next { z-index: 1; }
@@ -134,29 +128,26 @@
       100% { transform: rotateX(0deg); }
     }
 
-    /* 콜론 영역 */
     .colon {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 6cqh;
-      height: 60cqh;
+      gap: 12px;
+      height: 125px;
     }
-    /* 콜론 점 크기 */
     .dot {
-      width: 4cqh;
-      height: 4cqh;
+      width: 8px;
+      height: 8px;
       background-color: var(--colon-color);
-      border-radius: 1cqh;
+      border-radius: 2px;
       transition: background-color 0.3s ease;
     }
 
-    /* 하단 날짜 영역 */
     .date-display {
-      margin-top: 5cqh;
+      margin-top: 24px;
       color: var(--date-color);
       font-family: 'Black Han Sans', sans-serif;
-      font-size: 10cqh; /* 컨테이너 높이에 맞춰 가독성 최적화 */
+      font-size: 22px;
       text-align: center;
       letter-spacing: 0.5px;
       transition: color 0.3s ease;
@@ -201,6 +192,37 @@
     function initClock() {
       updateClock(true);
       setInterval(() => updateClock(false), 1000);
+      
+      resizeClock();
+      window.addEventListener('resize', resizeClock);
+    }
+
+    function resizeClock() {
+      const baseWidth = 480;
+      const baseHeight = 200;
+      const minWidth = 240;
+
+      let winWidth = window.innerWidth;
+      let winHeight = window.innerHeight;
+
+      if (winWidth < minWidth) {
+        winWidth = minWidth;
+      }
+      
+      const minHeight = (minWidth * baseHeight) / baseWidth;
+      if (winHeight < minHeight) {
+        winHeight = minHeight;
+      }
+
+      const scaleX = winWidth / baseWidth;
+      const scaleY = winHeight / baseHeight;
+      const scale = Math.min(scaleX, scaleY);
+
+      const container = document.querySelector('.clock-container');
+      if (container) {
+        container.style.transform = `scale(${scale})`;
+        container.style.transformOrigin = 'center';
+      }
     }
 
     function updateClock(isFirst) {
