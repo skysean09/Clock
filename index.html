@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notion Responsive Flip Clock</title>
+    <title>Notion Fit Flip Clock</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
 
-        /* 테마별 변수 정의 (노션 라이트/다크 모드 완벽 대응) */
+        /* 테마별 변수 정의 */
         :root {
             --bg-color: #ffffff;
             --panel-bg: #e3e4e8;
@@ -33,62 +33,56 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
             user-select: none;
+            box-sizing: border-box;
             transition: background-color 0.3s ease;
         }
 
-        /* 메인 컨테이너: 창 크기에 맞춰 유동적으로 확장 */
+        /* 메인 컨테이너: 임베드 화면 크기에 꽉 차게 설정하고 크기 감지 컨테이너로 지정 */
         .clock-container {
-            width: 90vw;
-            max-width: 800px;
+            width: 95%;
+            height: 95%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-sizing: border-box;
-            padding: 2vw;
+            container-type: size; /* 부모 크기 기준 계산을 위한 엔진 활성화 */
         }
 
-        /* 시계 래퍼: 좁은 화면(사이드바) 대응을 위해 wrap 설정 */
+        /* 시계 래퍼 */
         .flip-clock {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1.5vw;
+            gap: 2cqw;
             width: 100%;
-            flex-wrap: wrap;
+            height: 70cqh; /* 전체 컨테이너 높이의 70% 고정 */
         }
 
-        /* 플립 박스 개별 단위: 창 크기에 비례하는 뷰포트 단위 적용 */
+        /* 플립 박스 개별 단위 */
         .flip-unit {
             position: relative;
-            width: 22vw;
-            height: 26vw;
-            max-width: 180px;
-            max-height: 220px;
+            width: 28%;
+            height: 100%;
             background-color: var(--panel-bg);
-            border-radius: 12px;
+            border-radius: 8px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-sizing: border-box;
         }
 
-        /* 시계 숫자 텍스트: 플립 유닛 크기에 연동 */
+        /* 시계 숫자 텍스트: 패널 높이에 최적화 */
         .time-text {
             font-family: 'Black Han Sans', sans-serif;
-            font-size: 14vw;
+            font-size: 55cqh; /* 패널 높이 기준 55%로 맞춰 절대 안 잘림 */
             color: var(--text-color);
             line-height: 1;
         }
 
-        @media (min-width: 800px) {
-            .time-text { font-size: 110px; }
-        }
-
-        /* 중앙 구분선: 미니멀 플립 감성 구현 */
+        /* 중앙 구분선 */
         .flip-unit::before {
             content: '';
             position: absolute;
@@ -104,28 +98,27 @@
         /* 콜론(점) 기호 */
         .colon {
             font-family: 'Black Han Sans', sans-serif;
-            font-size: 10vw;
+            font-size: 45cqh;
             color: var(--colon-color);
             line-height: 1;
-            padding-bottom: 2vw;
-        }
-
-        @media (min-width: 800px) {
-            .colon { font-size: 80px; }
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 4%;
+            height: 100%;
         }
 
         /* 날짜 및 요일 표시부 */
         .date-display {
-            margin-top: 3vw;
+            height: 20cqh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Black Han Sans', sans-serif;
-            font-size: 3.5vw;
+            font-size: 12cqh; /* 컨테이너 전체 높이에 연동 */
             color: var(--date-color);
             letter-spacing: 1px;
             text-align: center;
-        }
-
-        @media (min-width: 800px) {
-            .date-display { font-size: 28px; }
         }
     </style>
 </head>
@@ -143,7 +136,6 @@
     </div>
 
     <script>
-        // 무한 반복 성능 최적화를 위한 텍스트 캐싱 처리
         const hoursEl = document.getElementById('hours');
         const minutesEl = document.getElementById('minutes');
         const secondsEl = document.getElementById('seconds');
@@ -154,18 +146,15 @@
         function updateClock() {
             const now = new Date();
 
-            // 시간 데이터 추출 및 포맷팅 (2자리 고정)
             const hrs = String(now.getHours()).padStart(2, '0');
             const mins = String(now.getMinutes()).padStart(2, '0');
             const secs = String(now.getSeconds()).padStart(2, '0');
 
-            // 날짜 데이터 포맷팅
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const date = String(now.getDate()).padStart(2, '0');
             const day = days[now.getDay()];
 
-            // DOM 갱신 불필요 연산 방지를 위한 값 비교 후 대입
             if (hoursEl.textContent !== hrs) hoursEl.textContent = hrs;
             if (minutesEl.textContent !== mins) minutesEl.textContent = mins;
             if (secondsEl.textContent !== secs) secondsEl.textContent = secs;
@@ -174,7 +163,6 @@
             if (dateEl.textContent !== fullDateString) dateEl.textContent = fullDateString;
         }
 
-        // 초기 실행 후 1초 주기로 연산 수행
         updateClock();
         setInterval(updateClock, 1000);
     </script>
